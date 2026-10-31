@@ -23,3 +23,8 @@
 ## Scripts (Windows PowerShell, sem Git necessário)
 - scripts/diagnostico-landing.ps1  -> DNS, SSL, HTTP navegador x robô, pixel, todos os caminhos.
 - scripts/cloudflare-validador.ps1 -> lê configs/bloqueios da Cloudflare e desliga Bot Fight Mode (pede confirmação).
+
+## Dica de teste
+- Para testar em aba anônima: Ctrl+Shift+N, depois Ctrl+L (barra de endereço) e colar a URL.
+  Colar na caixa de pesquisa do Google gera uma busca ("nenhum documento correspondente"), não abre o site.
+- Confirmado 31/10/2026: presell abre normal em aba anônima.
