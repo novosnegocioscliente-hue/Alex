@@ -36,37 +36,38 @@ const espera = (ms) => new Promise((r) => setTimeout(r, ms));
         botoesDeCompra: compra.length, botoesVisiveis: compra.filter(vis).length,
         textosVisiveis: compra.filter(vis).map((a) => (a.textContent || '').trim().slice(0, 30)),
         video: v ? { tempo: Math.round(v.currentTime), pausado: v.paused, pronto: v.readyState } : 'sem <video>',
+        botaoDoPlayer: [...document.querySelectorAll('a,button')].filter((a) => /I WANT IT NOW/i.test(a.textContent || '') && vis(a)).length,
         escondidos: [...document.querySelectorAll('.hide,.vsl-hide,.esconder,.hidden')].filter((e) => !vis(e)).length
       };
     });
     await pg.goto(URLP + '?vsl_seek=1230&utm_source=teste_robo', { waitUntil: 'networkidle2', timeout: 60000 });
+    await espera(2000);
     W('\n1) Pagina carregada (antes do play): ' + JSON.stringify(await estado()));
-    try { await pg.click('.vsl-player'); } catch (e) { W('   (nao consegui clicar no player: ' + e.message + ')'); }
-    await espera(9000);
-    W('2) 9s depois do play (o video deveria estar em ~20:30): ' + JSON.stringify(await estado()));
-    await pg.evaluate(() => { const v = document.querySelector('video'); if (v) { v.muted = true; v.currentTime = 1235; v.play().catch(() => {}); } });
-    await espera(8000);
-    const fim = await estado();
-    W('3) Forcando o video para 20:35 e tocando 8s: ' + JSON.stringify(fim));
+    // o player troca a marcacao ao carregar (.vsl-player vira .vslp): clica no centro da caixa do player
+    const alvo = await pg.evaluate(() => {
+      const c = document.querySelector('.vslp-bplay') || document.querySelector('.vslp-ov.on') || document.querySelector('.vslp') || document.querySelector('[class*="vslp"]') || document.querySelector('.vsl-player');
+      if (!c) return null; c.scrollIntoView({ block: 'center' }); const r = c.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, cls: String(c.className) };
+    });
+    if (alvo) { await pg.mouse.click(alvo.x, alvo.y); W('   clique no player: ' + alvo.cls); } else W('   player nao encontrado na tela');
+    await espera(12000);
+    W('2) 12s depois do play (com ?vsl_seek=1230 o video deve estar em ~20:30): ' + JSON.stringify(await estado()));
+    let fim = await estado();
+    if (!(fim.main && fim.main.visivel)) {
+      await pg.evaluate(() => { const v = document.querySelector('video'); if (v) { v.muted = true; if (v.currentTime < 1200) v.currentTime = 1235; v.play().catch(() => {}); } });
+      await espera(10000);
+      fim = await estado();
+      W('3) Garantindo o video em 20:35 tocando por 10s: ' + JSON.stringify(fim));
+    }
     await pg.screenshot({ path: SHOT });
     W('\nRESULTADO: ' + (fim.main && fim.main.visivel && fim.botoesVisiveis > 0 ? 'OFERTA APARECE no tempo certo (' + fim.botoesVisiveis + ' botao(oes) de compra visiveis).'
       : fim.botoesVisiveis > 0 ? 'So o botao do player aparece; a oferta da pagina (<main>) continua ESCONDIDA.' : 'A OFERTA NAO APARECEU: nenhum botao de compra visivel.'));
     if (erros.length) { W('\nErros na pagina:'); erros.slice(0, 15).forEach((e) => W('  ' + e.slice(0, 300))); }
     // trechos para a correcao: como a pagina publicada esconde/revela e como o player revela
-    const html = await pg.content();
-    W('\n=== SCRIPTS DA PAGINA PUBLICADA QUE MEXEM COM hide/delay');
-    (html.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).filter((s) => /delaySeconds|\bhide\b|classList|vsl_seek|vturb|smartplayer/i.test(s) && !/application\/json/.test(s)).slice(0, 4)
-      .forEach((s, i) => W(`--- script ${i + 1} (${s.length} caracteres): ${s.slice(0, 2500).replace(/\s+/g, ' ')}`));
-    (html.match(/[^{}]*\.hide\b[^{]*\{[^}]*\}/g) || []).slice(0, 4).forEach((c) => W('  CSS: ' + c.trim().slice(0, 200)));
-    W('\n=== vsl-player.js: onde ele revela os elementos (delay/seletor)');
-    const pj = fs.readFileSync(path.join(R, 'player', 'vsl-player.js'), 'utf8');
-    const ini = pj.indexOf('].join(') > 0 ? pj.indexOf('].join(') : 0;   // pula o bloco de CSS
-    const re = /seletor|\.delay\b|vsl_seek/g; re.lastIndex = ini; let m, n = 0, ult = -9999;
-    while ((m = re.exec(pj)) && n < 6) { if (m.index - ult < 500) continue; ult = m.index; n++; W(`--- posicao ${m.index}: ${pj.slice(Math.max(0, m.index - 300), m.index + 700).replace(/\s+/g, ' ')}`); }
   } finally { await b.close(); }
 })().catch((e) => W('ERRO: ' + e.message)).finally(() => console.log(out.join('\n')));
 '@, (New-Object Text.UTF8Encoding $false))
-Write-Host "Abrindo o funil como um lead (leva ~40 s)..." -ForegroundColor Cyan
+Write-Host "Abrindo o funil como um lead (leva ~1 min)..." -ForegroundColor Cyan
 $res = & $node $js $R 'https://kings-code-page.boldhabitco.cloud/' (Join-Path $d 'kings-teste-20m30.png') 2>&1 | Out-String
 $arq = Join-Path $d 'verificar-oferta.txt'
 ("##### VERIFICAR OFERTA KINGS $(Get-Date -f s) #####`r`n" + $res) | Set-Content $arq -Encoding UTF8
