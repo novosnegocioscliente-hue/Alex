@@ -33,6 +33,7 @@ const espera = (ms) => new Promise((r) => setTimeout(r, ms));
         video: v ? { tempo: Math.round(v.currentTime), pausado: v.paused, pronto: v.readyState } : 'sem <video>',
         botaoDoPlayer: [...document.querySelectorAll('a,button')].filter((a) => /I WANT IT NOW/i.test(a.textContent || '') && vis(a)).length,
         escondidos: [...document.querySelectorAll('.hide,.vsl-hide,.esconder,.hidden')].filter((e) => !vis(e)).length,
+        timer: ((document.getElementById('timer') || {}).textContent || '').trim().slice(0, 20) || 'sem timer',
         posicao: (() => { const y = (q) => { const e = document.querySelector(q); return e ? Math.round(e.getBoundingClientRect().top + scrollY) : null; }; return { playerY: y('.vslp') || y('.vsl-player'), h1Y: y('h1'), mainY: y('main'), footerY: y('footer'), alturaPagina: document.documentElement.scrollHeight }; })()
       };
     });
