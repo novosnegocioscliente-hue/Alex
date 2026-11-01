@@ -55,10 +55,10 @@ INGREDIENTES ─► E1 Coleta ─► E2 Análise no navegador ─► E3 Montagem
 | Página da VSL (link, zip ou HTML) | sim | |
 | Vídeo de vendas (arquivo) | sim | |
 | Link do checkout (com ID de afiliado) | sim | |
-| Presell (link, zip ou HTML) | não | sem presell → VSL direto |
+| Presell (link, zip ou HTML) | não | **sem presell → a ferramenta cria um advertorial automático** (skills de presell/advertorial), em inglês, baseado na VSL |
 | Tempo do pitch | não | detectado da página; perguntado só se não achar |
 | Pixel / scripts | não | fica salvo como padrão |
-| Criativos | não | uso a definir com o usuário |
+| Criativos | não | padrão: um link com `utm_content=<nome do criativo>` por criativo (usuário sem preferência) |
 
 ## 6. Migração (a partir do código atual, sem jogar fora o que funciona)
 1. **M1 — Verificação real como portão** (substitui teste.js pelo teste em Chrome). Maior ganho: nunca mais "funil completo" falso.
@@ -71,3 +71,9 @@ INGREDIENTES ─► E1 Coleta ─► E2 Análise no navegador ─► E3 Montagem
 - Chrome headless (já no PC) em vez de parser JS novo: zero instalação, mesmo motor do lead; custo: ~5–20 s por análise.
 - Portão de verificação atrasa a entrega em ~1 min; em troca, link entregue = funil funcionando.
 - Redundância no delay (script da página + player): cobre páginas cujo script não acha o player.
+
+## 8. Decisões do usuário (01/11/2026)
+- Sem presell entregue → **criar presell automática** (advertorial em inglês a partir da VSL; usuário revisa depois).
+- Criativos → sem preferência; padrão adotado: link com UTM por criativo (não altera a página).
+- Rastreamento → sem preferência; padrão: instalar o(s) script(s) colados no campo de pixel (hoje o pixel BuyGoods),
+  salvo como padrão para as próximas ofertas, e remover sempre os pixels do produtor.
