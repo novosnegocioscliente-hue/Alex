@@ -32,7 +32,8 @@ const espera = (ms) => new Promise((r) => setTimeout(r, ms));
         textosVisiveis: compra.filter(vis).map((a) => (a.textContent || '').trim().slice(0, 30)),
         video: v ? { tempo: Math.round(v.currentTime), pausado: v.paused, pronto: v.readyState } : 'sem <video>',
         botaoDoPlayer: [...document.querySelectorAll('a,button')].filter((a) => /I WANT IT NOW/i.test(a.textContent || '') && vis(a)).length,
-        escondidos: [...document.querySelectorAll('.hide,.vsl-hide,.esconder,.hidden')].filter((e) => !vis(e)).length
+        escondidos: [...document.querySelectorAll('.hide,.vsl-hide,.esconder,.hidden')].filter((e) => !vis(e)).length,
+        posicao: (() => { const y = (q) => { const e = document.querySelector(q); return e ? Math.round(e.getBoundingClientRect().top + scrollY) : null; }; return { playerY: y('.vslp') || y('.vsl-player'), h1Y: y('h1'), mainY: y('main'), footerY: y('footer'), alturaPagina: document.documentElement.scrollHeight }; })()
       };
     });
     await pg.goto(URLP + '?vsl_seek=1230&utm_source=teste_robo', { waitUntil: 'networkidle2', timeout: 60000 });
